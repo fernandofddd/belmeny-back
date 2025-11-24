@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\MiscController;
 use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\Api\ExportListaPrecioCadenasController;
+use App\Http\Controllers\Api\ChxpressApiController;
 use App\Models\Image;
 
 /*
@@ -103,6 +104,8 @@ Route::get('getUsuario', [DashboardController::class, 'getUsuario']); // Informa
 Route::get('getInfoCobranza', [DashboardController::class, 'getInfoCobranza']); // Información de Cobranzas
 Route::get('getMetaVendedor', [DashboardController::class, 'getMetasPorVendedor']); // Metas y progresos
 Route::get('getClientesAtendidos', [DashboardController::class, 'getClientesAtendidos']); // Obtener clientes atendidos
+Route::get('/chxpress/guias', [ChxpressApiController::class, 'obtenerGuias']);
+Route::get('/obtenerGuias', [ChxpressApiController::class, 'obtenerGuias']);
 Route::get('getPorcentajeVendedor', [DashboardController::class, 'getPorcentajeVendedor']); // Para obtener los porcentajes de las compras de los top 100 productos del vendedor
 
 //Cobranzas x Cliente del Vendedor
