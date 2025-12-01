@@ -31,7 +31,7 @@ class CobranzasController extends Controller
         'S02' => ['S02','S06', 'S07'],
         'S001' => ['S08', 'S09'],
     ];
-    
+
     protected $supervisor_names = [
         'S02' => 'Luis Sastre (Grupo)', // Nombre del supervisor principal del grupo
         'S001' => 'Grupo S001',
@@ -53,15 +53,23 @@ class CobranzasController extends Controller
                 $supervisorsToQuery = [$request->Usuario];
             }
         }
-        $cobranza = null; 
+        $cobranza = null;
 
         if (substr($request->Usuario, 0, 1) === 'V') {
-            $cobranza = DB::table("s010_CobranzaEncabezado as c")
+            if($request->Usuario == 'V1300'){
+           $cobranza = DB::table('s010_CobranzaEncabezado as c')
+            ->join('a010_clientes_auditoria_tiendas as t', 't.Codigo', '=', 'c.CodCliente')
+            ->select('c.*', 't.Nombre')
+            ->orderBy('c.FechaCobranza', 'desc')
+            ->paginate(15);
+            }else{
+                $cobranza = DB::table("s010_CobranzaEncabezado as c")
                 ->join('w004_zona as z', 'c.Usuario', '=', 'z.CodVendedor')
                 ->select('c.*', 'z.Nombre')
                 ->where('c.Usuario', '=', $request->Usuario) // Filters directly by the user's V code
                 ->orderBy('c.FechaCobranza', 'desc')
                 ->paginate(15);
+            }
         } else {
             $cobranzaQuery = DB::table("s010_CobranzaEncabezado as c")
                 ->join('w004_zona as z', 'c.Usuario', '=', 'z.CodVendedor')
@@ -75,7 +83,7 @@ class CobranzasController extends Controller
             $cobranza = $cobranzaQuery->orderBy('c.FechaCobranza', 'desc')
                 ->paginate(15);
         }
-        
+
         return response()->json($cobranza);
     }
 
@@ -101,10 +109,17 @@ class CobranzasController extends Controller
             }
         }
 
-        $query = DB::table('s010_CobranzaEncabezado as c')
+        if($codUsuario == 'V1300'){
+            $query = DB::table('s010_CobranzaEncabezado as c')
+            ->join('a010_clientes_auditoria_tiendas as t', 't.Codigo', '=', 'c.codCliente')
+            ->select('c.*');
+        }else{
+            $query = DB::table('s010_CobranzaEncabezado as c')
             ->join('w004_zona as z', 'c.Usuario', '=', 'z.CodVendedor')
             ->select('c.*', 'z.Nombre');
+        }
 
+        if($codUsuario != 'V1300'){
         if (substr($codUsuario, 0, 1) === 'V') {
             $query->where('z.CodVendedor', '=', $codUsuario);
         } else {
@@ -113,6 +128,7 @@ class CobranzasController extends Controller
             } else {
                 $query->where('z.CodSupervisor', '=', $codUsuario);
             }
+        }
         }
         switch ($request->whatToSearch) {
             case 'Documento':
@@ -125,7 +141,7 @@ class CobranzasController extends Controller
 
             case 'Fecha':
                 $query->whereBetween('c.FechaCobranza', [$request->fechaInicio, $request->fechaFin]);
-
+                break;
             case 'Vendedor':
                 $query->where('z.Nombre', 'LIKE', '%' . $request->Busqueda . '%');
                 break;
@@ -271,13 +287,25 @@ class CobranzasController extends Controller
     }
 
     // Caso: vendedor individual u otro código (ej. Vxxx)
-    $cobranzaVendedor = DB::table('e100_FacturaEncabezado AS fe')
+    if($cod == 'V1300'){
+        $cobranzaVendedor = DB::table('e100_FacturaEncabezado AS fe')
+        ->join('a010_clientes_auditoria_tiendas as t', 't.Codigo', '=', 'fe.codCliente')
+        ->select('fe.Documento', 'fe.codcliente', 'fe.nombrecli', 'fe.FechaDocumento', 'fe.FechaVencimiento', 'fe.TotalFact', 'fe.Abonado', 'fe.TotalPend')
+        ->whereColumn('fe.TotalFact', '>', 'fe.Abonado')
+        ->orderBy('fe.nombrecli')
+        ->orderBy('fe.FechaDocumento', 'desc')
+        ->get();
+
+    }else{
+        $cobranzaVendedor = DB::table('e100_FacturaEncabezado AS fe')
         ->select('fe.Documento', 'fe.codcliente', 'fe.nombrecli', 'fe.FechaDocumento', 'fe.FechaVencimiento', 'fe.TotalFact', 'fe.Abonado', 'fe.TotalPend')
         ->whereColumn('fe.TotalFact', '>', 'fe.Abonado')
         ->where('fe.CodigoVendedor', $cod)
         ->orderBy('fe.nombrecli')
         ->orderBy('fe.FechaDocumento', 'desc')
         ->get();
+
+    }
 
     return response()->json($cobranzaVendedor);
 }

@@ -94,13 +94,21 @@ class ClienteController extends BaseController
 
     public function getClientesByVendedorAndRif(Request $request)
     {
-        $clientes = DB::table('a010_clientes')
+        if($request->Vendedor == 'V1300'){
+            $clientes = DB::table('a010_clientes_auditoria_tiendas')
+            ->select('*')
+            ->where('Codigo', 'LIKE', '%' . $request->Codigo . '%')
+            ->orderBy('Nombre', 'asc')
+            ->get();
+        }else{
+            $clientes = DB::table('a010_clientes')
             ->select('*')
             ->where('Vendedor', '=', $request->Vendedor)
             ->where('Codigo', 'LIKE', '%' . $request->Codigo . '%')
             ->orderBy('Nombre', 'asc')
             ->get();
 
+        }
         return response()->json($clientes);
     }
 
