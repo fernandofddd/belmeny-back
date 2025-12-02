@@ -99,7 +99,7 @@ class CobranzasController extends Controller
     public function getCobranzasPorBusqueda(Request $request)
     {
         $codUsuario = $request->CodUsuario;
-
+        $usuario = $request->Usuario;
         $supervisorsToQuery = [];
         if ($codUsuario && substr($codUsuario, 0, 1) === 'S') {
             if (isset($this->supervisor_general[$codUsuario])) {
