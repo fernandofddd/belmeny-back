@@ -29,9 +29,9 @@ class ManifiestoController extends Controller
 
     protected $supervisor_general = [
         'S02' => ['S02','S06', 'S07'],
-        'S001' => ['S08', 'S09'],
+        'S03' => ['S03','S08'],
     ];
-    
+
     protected $supervisor_names = [
         'S02' => 'Luis Sastre (Grupo)', // Nombre del supervisor principal del grupo
         'S001' => 'Grupo S001',
@@ -41,8 +41,9 @@ class ManifiestoController extends Controller
        'S04' => 'ADEL CODALLO',
        'S06' => 'Antonio Perez',
         'S07' => 'Carlos Valiente',
+        'S08' => 'Franklin Taylor',
     ];
-    
+
     public function getManifiestoVendedor(Request $request)
     {
         if ($request->Vendedor === 'none') {
@@ -119,14 +120,14 @@ class ManifiestoController extends Controller
     public function getManifiestoxSupervisor(Request $request)
     {
         $supervisorsToQuery = [];
-        $requestSupervisor = $request->Supervisor; 
+        $requestSupervisor = $request->Supervisor;
 
         if ($requestSupervisor && isset($this->supervisor_general[$requestSupervisor])) {
             $supervisorsToQuery = $this->supervisor_general[$requestSupervisor];
         } else {
             $supervisorsToQuery = [$requestSupervisor];
         }
-       
+
 
         $manifiestoQuery = DB::table('z050_ManifiestoEncabezado')
             ->select(
@@ -142,11 +143,11 @@ class ManifiestoController extends Controller
             ->join('b040_usuario', 'z051_ManifiestoDetalle.Vendedor', '=', 'b040_usuario.CodVendedor');
 
         if (!empty($supervisorsToQuery)) {
-            $manifiestoQuery->whereIn('b040_usuario.CodSupervisor', $supervisorsToQuery); 
+            $manifiestoQuery->whereIn('b040_usuario.CodSupervisor', $supervisorsToQuery);
         } else {
             $manifiestoQuery->where('b040_usuario.CodSupervisor', $requestSupervisor);
         }
-        
+
         $manifiesto = $manifiestoQuery->orderBy('z050_ManifiestoEncabezado.Documento', 'desc')
             ->orderBy('b040_usuario.Nombre', 'asc')
             ->paginate(15);
@@ -197,13 +198,13 @@ class ManifiestoController extends Controller
                 )
                 ->join('z051_ManifiestoDetalle', 'z050_ManifiestoEncabezado.Documento', '=', 'z051_ManifiestoDetalle.DocumentoDetalle')
                 ->join('b040_usuario', 'z051_ManifiestoDetalle.Vendedor', '=', 'b040_usuario.CodVendedor');
-            
+
             // Apply the supervisor filter using whereIn
             if (!empty($supervisorsToQuery)) {
                 $query->whereIn('b040_usuario.CodSupervisor', $supervisorsToQuery);
             }
             // Note: No 'else' for an empty $supervisorsToQuery as the logic above ensures it's never empty if $request->Supervisor has a value.
-            
+
             return $query;
         };
 
@@ -214,7 +215,7 @@ class ManifiestoController extends Controller
                 ->orderBy('z050_ManifiestoEncabezado.Documento', 'desc')
                 ->orderBy('b040_usuario.Nombre', 'asc')
                 ->paginate(15); // Original pagination
-            
+
             return response()->json($manifiesto);
         }
 
@@ -224,7 +225,7 @@ class ManifiestoController extends Controller
                 ->orderBy('z050_ManifiestoEncabezado.Documento', 'desc')
                 ->orderBy('b040_usuario.Nombre', 'asc')
                 ->paginate(15); // Original pagination
-            
+
             return response()->json($manifiesto);
         }
 
@@ -234,11 +235,11 @@ class ManifiestoController extends Controller
                 ->orderBy('z050_ManifiestoEncabezado.Documento', 'desc')
                 ->orderBy('b040_usuario.Nombre', 'asc')
                 ->paginate(500); // Original pagination
-            
+
             return response()->json($manifiesto);
         }
 
         // If no search criteria is provided, return an empty response or a default list
-        return response()->json([]); 
+        return response()->json([]);
     }
 }

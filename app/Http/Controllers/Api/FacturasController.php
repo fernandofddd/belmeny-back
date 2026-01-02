@@ -36,9 +36,9 @@ class FacturasController extends BaseController
 
     protected $supervisor_general = [
         'S02' => ['S02','S06', 'S07'],
-        'S001' => ['S08', 'S09'],
+        'S03' => ['S03','S08'],
     ];
-    
+
     protected $supervisor_names = [
         'S02' => 'Luis Sastre (Grupo)', // Nombre del supervisor principal del grupo
         'S001' => 'Grupo S001',
@@ -48,8 +48,9 @@ class FacturasController extends BaseController
        'S04' => 'ADEL CODALLO',
        'S06' => 'Antonio Perez',
         'S07' => 'Carlos Valiente',
+        'S08' => 'Franklin Taylor',
     ];
-    
+
     public function index(Request $request)
     {
         $filter = new FacturasFilter();
@@ -63,7 +64,7 @@ class FacturasController extends BaseController
     public function getFacturasxGerente(Request $request)
     {
         $supervisorsToQuery = [];
-        
+
         if ($request->CodSupervisor && substr($request->CodSupervisor, 0, 1) === 'S') {
             if (isset($this->supervisor_general[$request->CodSupervisor])) {
                 $supervisorsToQuery = $this->supervisor_general[$request->CodSupervisor];
@@ -78,7 +79,7 @@ class FacturasController extends BaseController
                 $facturasQuery->whereIn('z.CodSupervisor', $supervisorsToQuery);
             }else{
                 $facturasQuery->where('z.CodSupervisor', '=', $request->CodSupervisor);
-            }           
+            }
 
             $facturas = $facturasQuery->orderBy('fe.FechaDocumento', 'DESC')
             ->paginate(15);
@@ -183,7 +184,7 @@ if ($request->filled('fechaInicio') && $request->filled('fechaFin')) {
     $perPage = intval($request->get('per_page', 15));
     $facturas = $facturasQuery->orderBy('fe.FechaDocumento', 'DESC')
         ->paginate($perPage);
-    
+
     return response()->json($facturas);
     }
 

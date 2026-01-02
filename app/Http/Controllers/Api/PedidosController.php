@@ -32,9 +32,9 @@ class PedidosController extends BaseController
 
     protected $supervisor_general = [
         'S02' => ['S02','S06', 'S07'],
-        'S001' => ['S08', 'S09'],
+        'S03' => ['S03','S08'],
     ];
-    
+
     protected $supervisor_names = [
         'S02' => 'Luis Sastre (Grupo)', // Nombre del supervisor principal del grupo
         'S001' => 'Grupo S001',
@@ -44,6 +44,7 @@ class PedidosController extends BaseController
        'S04' => 'ADEL CODALLO',
        'S06' => 'Antonio Perez',
         'S07' => 'Carlos Valiente',
+        'S08' => 'Franklin Taylor',
     ];
     /**
      * Display a listing of the resource.
@@ -65,7 +66,7 @@ class PedidosController extends BaseController
     public function getPedidosxGerente(Request $request)
     {
         $supervisorsToQuery = [];
-        
+
         if ($request->CodSupervisor && substr($request->CodSupervisor, 0, 1) === 'S') {
             if (isset($this->supervisor_general[$request->CodSupervisor])) {
                 $supervisorsToQuery = $this->supervisor_general[$request->CodSupervisor];
@@ -82,7 +83,7 @@ class PedidosController extends BaseController
         } else {
             $pedidosQuery->where('z.CodSupervisor', '=', $request->CodSupervisor);
         }
-        
+
         $pedidos = $pedidosQuery->orderBy('pe.fechayhora', 'DESC')
             ->paginate(15);
 
@@ -202,7 +203,7 @@ class PedidosController extends BaseController
     {
         $documento = $request->input('Documento');
 
-    
+
     $productos = DB::table('e020_PedidoDetalle')
         ->select('Agencia', 'Documento', 'CodigoCliente', 'Codigo', 'Nombre', 'ListaPrecio', 'PrecioUnit', 'Cantidad', 'Subtotal', 'FechaHora', 'Descargado')
         ->where('Documento', $documento)

@@ -25,9 +25,9 @@ class TrackingController extends Controller
 
     protected $supervisor_general = [
         'S02' => ['S02','S06', 'S07'],
-        'S001' => ['S08', 'S09'],
+        'S03' => ['S03','S08'],
     ];
-    
+
     protected $supervisor_names = [
         'S02' => 'Luis Sastre (Grupo)', // Nombre del supervisor principal del grupo
         'S001' => 'Grupo S001',
@@ -37,8 +37,9 @@ class TrackingController extends Controller
        'S04' => 'ADEL CODALLO',
        'S06' => 'Antonio Perez',
         'S07' => 'Carlos Valiente',
+        'S08' => 'Franklin Taylor',
     ];
-    
+
   public function TrackPedidosVendedor(Request $request)
   {
     $filter = new TrackingFilter();
@@ -76,7 +77,7 @@ class TrackingController extends Controller
         ->where('Documento', '=', $request->Documento)
         ->orderBy('FechaCreacion', 'DESC')
         ->get();
-        
+
 
     return response()->json($tracking);
   }
@@ -100,7 +101,7 @@ class TrackingController extends Controller
    public function getTrackingxZonaSupervisor(Request $request)
     {
         $supervisorsToQuery = [];
-        $requestCodSupervisor = $request->CodSupervisor; 
+        $requestCodSupervisor = $request->CodSupervisor;
 
         if ($requestCodSupervisor && isset($this->supervisor_general[$requestCodSupervisor])) {
             $supervisorsToQuery = $this->supervisor_general[$requestCodSupervisor];
@@ -112,10 +113,10 @@ class TrackingController extends Controller
             ->select(['sd.*', 'z.Sector', 'z.Nombre'])
             ->whereBetween('FechaCreacion', [
                 DB::raw('DATE_SUB(LAST_DAY(NOW()), INTERVAL DAYOFMONTH(LAST_DAY(NOW())) -1 day)'),
-                DB::raw('LAST_DAY(NOW())') 
+                DB::raw('LAST_DAY(NOW())')
             ]);
         if (!empty($supervisorsToQuery)) {
-            $tracking->whereIn('z.CodSupervisor', $supervisorsToQuery); 
+            $tracking->whereIn('z.CodSupervisor', $supervisorsToQuery);
         } else {
             $tracking->where('z.CodSupervisor', '=', $requestCodSupervisor);
         }
@@ -129,7 +130,7 @@ class TrackingController extends Controller
 
         return response()->json($tracking);
     }
-  
+
   public function getTrackingxZonaSupervisorDocumento(Request $request)
     {
         // --- START: Logic to determine $supervisorsToQuery ---
@@ -150,7 +151,7 @@ class TrackingController extends Controller
         $tracking = DB::table('s060_despacho as sd')
             ->join('w004_zona as z', 'sd.CodVendedor', '=', 'z.CodVendedor')
             ->select(['sd.*', 'z.Sector', 'z.Nombre AS NombreVendedor']);
-            
+
         // Apply the supervisor filter using whereIn
         if (!empty($supervisorsToQuery)) {
             $tracking->whereIn('z.CodSupervisor', $supervisorsToQuery); // <-- KEY CHANGE HERE!
@@ -159,7 +160,7 @@ class TrackingController extends Controller
             // or if a direct match is needed outside of defined groups.
             $tracking->where('z.CodSupervisor', '=', $requestCodSupervisor);
         }
-        
+
         // Add the specific document filter
         $tracking->where('sd.Documento', $request->Documento);
 
@@ -168,7 +169,7 @@ class TrackingController extends Controller
             DB::raw('DATE_SUB(CURDATE(), INTERVAL (DAY(CURDATE())-1) DAY)'), // First day of current month
             DB::raw('LAST_DAY(CURDATE())') // Last day of current month
         ]);
-        
+
         // Finally, get the results
         $tracking = $tracking->get();
 
@@ -178,8 +179,8 @@ class TrackingController extends Controller
     {
         // Your initial pagination variables are defined but not used with ->get()
         // If you intend to paginate, you'll need to change ->get() to ->paginate($perPage).
-        $perPage = $request->input('perPage', 10); 
-        $page = $request->input('page', 1); 
+        $perPage = $request->input('perPage', 10);
+        $page = $request->input('page', 1);
 
         // --- START: Logic to determine $supervisorsToQuery ---
         $supervisorsToQuery = [];
@@ -199,7 +200,7 @@ class TrackingController extends Controller
         $tracking = DB::table('s060_despacho as sd')
             ->join('w004_zona as z', 'sd.CodVendedor', '=', 'z.CodVendedor')
             ->select(['sd.*', 'z.Sector', 'z.Nombre AS NombreVendedor']);
-            
+
         // Apply the supervisor filter using whereIn
         if (!empty($supervisorsToQuery)) {
             $tracking->whereIn('z.CodSupervisor', $supervisorsToQuery); // <-- KEY CHANGE HERE!
@@ -208,7 +209,7 @@ class TrackingController extends Controller
             // or if a direct match is needed outside of defined groups.
             $tracking->where('z.CodSupervisor', '=', $requestCodSupervisor);
         }
-        
+
         // Add the specific client name filter
         $tracking->where('NombreCliente', 'LIKE', '%' . $request->Cliente . '%');
 
@@ -217,11 +218,11 @@ class TrackingController extends Controller
             DB::raw('DATE_SUB(CURDATE(), INTERVAL (DAY(CURDATE())-1) DAY)'), // First day of current month
             DB::raw('LAST_DAY(CURDATE())') // Last day of current month
         ]);
-        
+
         // Apply the limit if it was intended to be used with ->get()
         // If you actually want pagination, remove ->limit(350) and change ->get() to ->paginate($perPage)
-        $tracking->limit(350); 
-        
+        $tracking->limit(350);
+
         // Finally, get the results
         $tracking = $tracking->get();
 
@@ -246,7 +247,7 @@ class TrackingController extends Controller
         // --- END: Logic to determine $supervisorsToQuery ---
 
         // Initialize $tracking outside the if/else to avoid potential 'undefined variable' issues
-        $tracking = null; 
+        $tracking = null;
 
         // Base query components that are common to both branches
         $baseQuery = DB::table('s060_despacho as sd')
@@ -259,7 +260,7 @@ class TrackingController extends Controller
         } else {
             $baseQuery->where('z.CodSupervisor', '=', $requestCodSupervisor);
         }
-        
+
         // --- Conditional logic based on $request->CodVendedor ---
         if ($request->CodVendedor !== 'none') {
             // Path 1: Specific date range from request (e.g., when a user selects dates)
@@ -273,7 +274,7 @@ class TrackingController extends Controller
                 ->select(['sd.*', 'z.Sector', 'z.Nombre']) // Original alias was 'Nombre' here, let's keep consistency.
                                                            // If you want NombreVendedor here too, use that alias.
                 ->whereBetween('FechaCreacion', [
-                    DB::raw('DATE_SUB(LAST_DAY(NOW()), INTERVAL DAYOFMONTH(LAST_DAY(NOW())) -1 day)'), 
+                    DB::raw('DATE_SUB(LAST_DAY(NOW()), INTERVAL DAYOFMONTH(LAST_DAY(NOW())) -1 day)'),
                     DB::raw('LAST_DAY(NOW())')
                 ])
                 ->orderBy('Estado', 'ASC')

@@ -26,7 +26,7 @@ class ClienteController extends BaseController
 {
     protected $supervisor_general = [
         'S02' => ['S02','S06','S07'],
-        'S001' => ['S08', 'S09'],
+        'S03' => ['S03','S08'],
     ];
 
     protected $supervisor_names = [

@@ -32,7 +32,7 @@ class DashboardController extends BaseController
 
     protected $supervisor_general = [
         'S02' => ['S02','S06', 'S07'],
-        'S001' => ['S08', 'S09'],
+        'S03' => ['S03','S08'],
     ];
 
     protected $supervisor_names = [
@@ -44,6 +44,7 @@ class DashboardController extends BaseController
        'S04' => 'ADEL CODALLO',
        'S06' => 'Antonio Perez',
         'S07' => 'Carlos Valiente',
+        'S08' => 'Franklin Taylor',
     ];
 
     public function linkApk(Request $request)
@@ -311,9 +312,14 @@ class DashboardController extends BaseController
                 $endDate = "2025-12-31 23:59:59";
                 break;
 
+            case 2026:
+                $startDate = "2026-01-01 00:00:00";
+                $endDate = "2026-12-31 23:59:59";
+                break;
+
             default:
-                $startDate = "2025-01-01 00:00:00";
-                $endDate = "2025-12-31 23:59:59";
+                $startDate = "2026-01-01 00:00:00";
+                $endDate = "2026-12-31 23:59:59";
                 break;
         }
 
@@ -392,10 +398,15 @@ class DashboardController extends BaseController
                 $endDate = "2025-12-31 23:59:59";
                 break;
 
+            case 2026:
+                $startDate = "2026-01-01 00:00:00";
+                $endDate = "2026-12-31 23:59:59";
+                break;
+
             default:
                 // Current year logic, can be dynamic with Carbon if needed
-                $startDate = "2025-01-01 00:00:00"; // Assuming 2025 is the default current year
-                $endDate = "2025-12-31 23:59:59";
+                $startDate = "2026-01-01 00:00:00"; // Assuming 2026 is the default current year
+                $endDate = "2026-12-31 23:59:59";
                 break;
         }
 
@@ -1559,18 +1570,18 @@ class DashboardController extends BaseController
             // Subquery for Maximo_Facturado: ensure 2024 is dynamic if needed
             ->leftJoin(DB::raw('(SELECT codcliente, MAX(Maximo_Facturado) AS Maximo_Facturado, Mes FROM (SELECT codcliente, DATE_FORMAT(FechaDocumento, "%Y-%m") AS Mes, SUM(TotalNeto) AS Maximo_Facturado FROM e100_FacturaEncabezado WHERE YEAR(FechaDocumento) = "2024" GROUP BY codcliente, DATE_FORMAT(FechaDocumento, "%Y-%m")) AS max_facturado_por_mes GROUP BY codcliente) AS maximo_facturado'), 'p.CodigoCliente', '=', 'maximo_facturado.codcliente')
             // Static month names, consider making dynamic or using a lookup if year changes
-            ->leftJoin(DB::raw('(SELECT "2024-01" AS Mes, "Enero" AS NomMes
-                UNION ALL SELECT "2024-02", "Febrero"
-                UNION ALL SELECT "2024-03", "Marzo"
-                UNION ALL SELECT "2024-04", "Abril"
-                UNION ALL SELECT "2024-05", "Mayo"
-                UNION ALL SELECT "2024-06", "Junio"
-                UNION ALL SELECT "2024-07", "Julio"
-                UNION ALL SELECT "2024-08", "Agosto"
-                UNION ALL SELECT "2024-09", "Septiembre"
-                UNION ALL SELECT "2024-10", "Octubre"
-                UNION ALL SELECT "2024-11", "Noviembre"
-                UNION ALL SELECT "2024-12", "Diciembre") AS Meses'), 'maximo_facturado.Mes', '=', 'Meses.Mes')
+            ->leftJoin(DB::raw('(SELECT "2025-01" AS Mes, "Enero" AS NomMes
+                UNION ALL SELECT "2025-02", "Febrero"
+                UNION ALL SELECT "2025-03", "Marzo"
+                UNION ALL SELECT "2025-04", "Abril"
+                UNION ALL SELECT "2025-05", "Mayo"
+                UNION ALL SELECT "2025-06", "Junio"
+                UNION ALL SELECT "2025-07", "Julio"
+                UNION ALL SELECT "2025-08", "Agosto"
+                UNION ALL SELECT "2025-09", "Septiembre"
+                UNION ALL SELECT "2025-10", "Octubre"
+                UNION ALL SELECT "2025-11", "Noviembre"
+                UNION ALL SELECT "2025-12", "Diciembre") AS Meses'), 'maximo_facturado.Mes', '=', 'Meses.Mes')
             ->select('p.*', DB::raw('IFNULL(SUM(f.TotalNeto), 0) AS Facturado'), DB::raw('IFNULL(maximo_facturado.Maximo_Facturado, 0) AS Maximo_Facturado'), DB::raw('COALESCE(Meses.NomMes, "N/A") AS Mes'))
             ->groupBy('p.CodigoCliente');
 

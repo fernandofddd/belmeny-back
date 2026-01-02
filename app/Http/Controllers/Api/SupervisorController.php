@@ -34,13 +34,13 @@ class SupervisorController extends Controller
     //Variable para que un supervisor pueda ver la informacion general de toda una zona y tengo sub-supervisores
     /*Aca dejo una variable arreglo para que se puedan añadir los que se necesiten y luego simplemente se llaman
     no hago otro perfil por falta de tiempo
-    pero con esto se puede acceder mas facilmente. 
-    Uso el S001 de ejemplo, no es un perfil de supervisor real, 
-    sino lo uso para excluir los perfiles que son de maracaibo pero no son de algun supervisor 
+    pero con esto se puede acceder mas facilmente.
+    Uso el S001 de ejemplo, no es un perfil de supervisor real,
+    sino lo uso para excluir los perfiles que son de maracaibo pero no son de algun supervisor
      */
     protected $supervisor_general = [
         'S02' => ['S02', 'S06', 'S07'],
-        'S001' => ['S08', 'S09'],
+        'S03' => ['S03','S08'],
     ];
 
     protected $supervisor_names = [
@@ -52,6 +52,7 @@ class SupervisorController extends Controller
         'S04' => 'ADEL CODALLO',
         'S06' => 'Antonio Perez',
         'S07' => 'Carlos Valiente',
+        'S08' => 'Franklin Taylor',
     ];
 
     public function getMetasSemanalVendedores(Request $request)
@@ -239,8 +240,8 @@ class SupervisorController extends Controller
                 'z.Sector',
                 DB::raw('ROUND(SUM(CASE WHEN fe.Estatus >= 0 THEN fe.TotalNeto ELSE 0 END)) as Facturado'),
                 DB::raw('ROUND((SUM(CASE WHEN fe.Estatus = 2 THEN fe.TotalNeto ELSE 0 END)) + ROUND(SUM(CASE WHEN fe.Estatus = 1 THEN fe.Abonado ELSE 0 END))) as CanceladoMasAbonado'),
-                DB::raw('ROUND((SUM(CASE WHEN fe.Estatus >= 0 THEN fe.TotalNeto ELSE 0 END)) - 
-            ROUND((SUM(CASE WHEN fe.Estatus = 2 THEN fe.TotalNeto ELSE 0 END)) + 
+                DB::raw('ROUND((SUM(CASE WHEN fe.Estatus >= 0 THEN fe.TotalNeto ELSE 0 END)) -
+            ROUND((SUM(CASE WHEN fe.Estatus = 2 THEN fe.TotalNeto ELSE 0 END)) +
             ROUND(SUM(CASE WHEN fe.Estatus = 1 THEN fe.Abonado ELSE 0 END)))) as Pendiente')
             )
             ->whereBetween('fe.FechaDocumento', [$request->fechaInicio, $request->fechaFin])
@@ -257,8 +258,8 @@ class SupervisorController extends Controller
             ->select(
                 DB::raw('ROUND(SUM(CASE WHEN fe.Estatus >= 0 THEN fe.TotalNeto ELSE 0 END)) as Facturado'),
                 DB::raw('ROUND((SUM(CASE WHEN fe.Estatus = 2 THEN fe.TotalNeto ELSE 0 END)) + ROUND(SUM(CASE WHEN fe.Estatus = 1 THEN fe.Abonado ELSE 0 END))) as CanceladoMasAbonado'),
-                DB::raw('ROUND((SUM(CASE WHEN fe.Estatus >= 0 THEN fe.TotalNeto ELSE 0 END)) - 
-            ROUND((SUM(CASE WHEN fe.Estatus = 2 THEN fe.TotalNeto ELSE 0 END)) + 
+                DB::raw('ROUND((SUM(CASE WHEN fe.Estatus >= 0 THEN fe.TotalNeto ELSE 0 END)) -
+            ROUND((SUM(CASE WHEN fe.Estatus = 2 THEN fe.TotalNeto ELSE 0 END)) +
             ROUND(SUM(CASE WHEN fe.Estatus = 1 THEN fe.Abonado ELSE 0 END)))) as Pendiente')
             )
             ->whereBetween('fe.FechaDocumento', [$request->fechaInicio, $request->fechaFin])
@@ -276,8 +277,8 @@ class SupervisorController extends Controller
                 'z.Nombre',
                 DB::raw('ROUND(SUM(CASE WHEN fe.Estatus >= 0 THEN fe.TotalNeto ELSE 0 END)) as Facturado'),
                 DB::raw('ROUND((SUM(CASE WHEN fe.Estatus = 2 THEN fe.TotalNeto ELSE 0 END)) + ROUND(SUM(CASE WHEN fe.Estatus = 1 THEN fe.Abonado ELSE 0 END))) as CanceladoMasAbonado'),
-                DB::raw('ROUND((SUM(CASE WHEN fe.Estatus >= 0 THEN fe.TotalNeto ELSE 0 END)) - 
-            ROUND((SUM(CASE WHEN fe.Estatus = 2 THEN fe.TotalNeto ELSE 0 END)) + 
+                DB::raw('ROUND((SUM(CASE WHEN fe.Estatus >= 0 THEN fe.TotalNeto ELSE 0 END)) -
+            ROUND((SUM(CASE WHEN fe.Estatus = 2 THEN fe.TotalNeto ELSE 0 END)) +
             ROUND(SUM(CASE WHEN fe.Estatus = 1 THEN fe.Abonado ELSE 0 END)))) as Pendiente')
             )
             ->whereBetween('fe.FechaDocumento', [$request->fechaInicio, $request->fechaFin])
@@ -308,8 +309,8 @@ class SupervisorController extends Controller
                 DB::raw('SUM(CASE WHEN f.Estatus >= 0 THEN f.BaseImponible ELSE 0 END) as Facturado'),
                 DB::raw('SUM(CASE WHEN f.Estatus = 2 THEN f.BaseImponible ELSE 0 END) as Pagado'),
                 DB::raw('SUM(CASE WHEN f.Estatus = 1 THEN f.Abonado ELSE 0 END) as Abonado'),
-                DB::raw('(SUM(CASE WHEN f.Estatus >= 0 THEN f.BaseImponible ELSE 0 END) - 
-                (SUM(CASE WHEN f.Estatus = 2 THEN f.BaseImponible ELSE 0 END) + 
+                DB::raw('(SUM(CASE WHEN f.Estatus >= 0 THEN f.BaseImponible ELSE 0 END) -
+                (SUM(CASE WHEN f.Estatus = 2 THEN f.BaseImponible ELSE 0 END) +
                 SUM(CASE WHEN f.Estatus = 1 THEN f.Abonado ELSE 0 END))) as Pendiente'),
                 DB::raw("CONCAT(UPPER(LEFT(DATE_FORMAT('" . $startDate1 . "', '%M'), 1)), LOWER(SUBSTRING(DATE_FORMAT('" . $endDate1 . "', '%M'), 2))) as Mes")
             )
@@ -328,8 +329,8 @@ class SupervisorController extends Controller
                 DB::raw('SUM(CASE WHEN f.Estatus >= 0 THEN f.BaseImponible ELSE 0 END) as Facturado'),
                 DB::raw('SUM(CASE WHEN f.Estatus = 2 THEN f.BaseImponible ELSE 0 END) as Pagado'),
                 DB::raw('SUM(CASE WHEN f.Estatus = 1 THEN f.Abonado ELSE 0 END) as Abonado'),
-                DB::raw('(SUM(CASE WHEN f.Estatus >= 0 THEN f.BaseImponible ELSE 0 END) - 
-                (SUM(CASE WHEN f.Estatus = 2 THEN f.BaseImponible ELSE 0 END) + 
+                DB::raw('(SUM(CASE WHEN f.Estatus >= 0 THEN f.BaseImponible ELSE 0 END) -
+                (SUM(CASE WHEN f.Estatus = 2 THEN f.BaseImponible ELSE 0 END) +
                 SUM(CASE WHEN f.Estatus = 1 THEN f.Abonado ELSE 0 END))) as Pendiente'),
                 DB::raw("CONCAT(UPPER(LEFT(DATE_FORMAT('" . $startDate2 . "', '%M'), 1)), LOWER(SUBSTRING(DATE_FORMAT('" . $endDate2 . "', '%M'), 2))) as Mes")
             )
@@ -428,6 +429,7 @@ class SupervisorController extends Controller
         'S05' => 'ARELYS COLMENARES',
         'S06' => 'Antonio Perez',
         'S07' => 'Carlos Valiente',
+        'S08' => 'Franklin Taylor',
     ];
     $cases = [];
     foreach ($supervisorNames as $code => $name) {
@@ -760,18 +762,18 @@ class SupervisorController extends Controller
                 $join->on('f.codcliente', '=', 'maximo_facturado.codcliente');
             })
             ->leftJoin(DB::raw('
-            (SELECT "2024-01" AS Mes, "Enero" AS NomMes
-            UNION ALL SELECT "2024-02", "Febrero"
-            UNION ALL SELECT "2024-03", "Marzo"
-            UNION ALL SELECT "2024-04", "Abril"
-            UNION ALL SELECT "2024-05", "Mayo"
-            UNION ALL SELECT "2024-06", "Junio"
-            UNION ALL SELECT "2024-07", "Julio"
-            UNION ALL SELECT "2024-08", "Agosto"
-            UNION ALL SELECT "2024-09", "Septiembre"
-            UNION ALL SELECT "2024-10", "Octubre"
-            UNION ALL SELECT "2024-11", "Noviembre"
-            UNION ALL SELECT "2024-12", "Diciembre") as Meses'), 'maximo_facturado.Mes', '=', 'Meses.Mes')
+            (SELECT "2025-01" AS Mes, "Enero" AS NomMes
+            UNION ALL SELECT "2025-02", "Febrero"
+            UNION ALL SELECT "2025-03", "Marzo"
+            UNION ALL SELECT "2025-04", "Abril"
+            UNION ALL SELECT "2025-05", "Mayo"
+            UNION ALL SELECT "2025-06", "Junio"
+            UNION ALL SELECT "2025-07", "Julio"
+            UNION ALL SELECT "2025-08", "Agosto"
+            UNION ALL SELECT "2025-09", "Septiembre"
+            UNION ALL SELECT "2025-10", "Octubre"
+            UNION ALL SELECT "2025-11", "Noviembre"
+            UNION ALL SELECT "2025-12", "Diciembre") as Meses'), 'maximo_facturado.Mes', '=', 'Meses.Mes')
             ->whereBetween('f.FechaDocumento', [
                 Carbon::now()->startOfMonth(), // Mejorado con Carbon
                 Carbon::now()->endOfMonth()    // Mejorado con Carbon
@@ -808,7 +810,7 @@ class SupervisorController extends Controller
     // 1) Armo el array de supervisores a consultar
     if ($codSup && substr($codSup, 0, 1) === 'S') {
         // Si hay hijos definidos para este supervisor, incluyo todos
-        $supervisorsToQuery = $this->supervisor_general[$codSup] 
+        $supervisorsToQuery = $this->supervisor_general[$codSup]
             ?? [$codSup];
     } else {
         // Si no es supervisor válido, devolvemos vacío o todos según necesidad
